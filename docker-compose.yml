@@ -1,0 +1,15 @@
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - "5060:5060"
+    environment:
+      - REDIS_AUTH_HOST=redis-session-auth
+    depends_on:
+      - redis-session-auth
+
+  redis-session-auth:
+    # No ports section needed since it's internal
+    image: "redis:alpine"
+    command: ["redis-server", "--port", "5050"]
