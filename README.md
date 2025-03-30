@@ -45,13 +45,13 @@ Provides endpoints for managing user sessions and authentication.
 ### Option 3: Create podman pod
 
 a) Build the image from the Dockerfile <br />
-<code>podman build -t auth-service-session-redis .</code> <br /> <br />
+<code>podman build -t auth-java-service .</code> <br /> <br />
 b) Create a pod (customize the exposed port if needed) <br /> 
 <code>podman pod create --name auth-service-pod -p 5060:5060</code> <br /> <br />
 c) Add the redis container to the pod <br />
-<code>podman run -d --name redis-in-pod --pod auth-service-pod docker.io/library/redis redis-server --port 5050</code> <br /> <br />
+<code>podman run -d --name redis-in-pod --pod auth-service-pod docker.io/library/redis:alpine redis-server --port 5050</code> <br /> <br />
 d) Add the java app container to the pod <br />
-<code>podman run -d --name auth-java-in-pod --pod auth-service-pod localhost/auth-service-session-redis</code> <br /> <br />
+<code>podman run -d --name auth-java-in-pod --pod auth-service-pod localhost/auth-java-service</code> <br /> <br />
 
 
 
