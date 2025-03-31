@@ -2,12 +2,14 @@ package com.plainprog.auth_session_redis.model;
 
 import java.security.Principal;
 import java.time.Instant;
+import java.util.List;
 
 public class SessionData {
     // This object is for attaching any custom data to the session
     private Object data;
 
     private Principal principal;
+    private List<String> roles;
     private String sessionId;
     private Instant creationTime;
     private Instant lastAccessedTime;
@@ -62,5 +64,13 @@ public class SessionData {
 
     public void setMaxInactiveInterval(Integer maxInactiveInterval) {
         this.maxInactiveInterval = maxInactiveInterval;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 }

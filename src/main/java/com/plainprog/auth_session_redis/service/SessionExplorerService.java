@@ -2,6 +2,9 @@ package com.plainprog.auth_session_redis.service;
 
 import com.plainprog.auth_session_redis.model.SessionData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import redis.clients.jedis.Jedis;
 import org.springframework.data.redis.serializer.RedisSerializer;
@@ -9,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -50,7 +54,7 @@ public class SessionExplorerService {
                 } else if (field.equals("sessionAttr:SPRING_SECURITY_CONTEXT")) {
                     Object context = serializer.deserialize(value);
                     if (context instanceof SecurityContextImpl) {
-                        Principal principal = ((SecurityContextImpl) context).getAuthentication();
+                        Principal principal = ((SecurityContextImpl) context).getAuthentication();;
                         sessionData.setPrincipal(principal);
                     }
                 } else if (field.equals("maxInactiveInterval")) {
@@ -64,6 +68,11 @@ public class SessionExplorerService {
                 e.printStackTrace();
             }
         }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        List<String> roles = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+        sessionData.setRoles(roles);
         sessionData.setSessionId(sessionId);
         return sessionData;
     }
