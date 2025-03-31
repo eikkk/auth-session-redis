@@ -1,5 +1,7 @@
 package com.plainprog.auth_session_redis.model;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
 import java.security.Principal;
 import java.time.Instant;
 import java.util.List;
@@ -8,7 +10,7 @@ public class SessionData {
     // This object is for attaching any custom data to the session
     private Object data;
 
-    private Principal principal;
+    private UsernamePasswordAuthenticationToken principal;
     private List<String> roles;
     private String sessionId;
     private Instant creationTime;
@@ -26,11 +28,11 @@ public class SessionData {
         this.data = data;
     }
 
-    public Principal getPrincipal() {
+    public UsernamePasswordAuthenticationToken getPrincipal() {
         return principal;
     }
 
-    public void setPrincipal(Principal principal) {
+    public void setPrincipal(UsernamePasswordAuthenticationToken principal) {
         this.principal = principal;
     }
 

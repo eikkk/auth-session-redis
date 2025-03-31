@@ -2,6 +2,7 @@ package com.plainprog.auth_session_redis.service;
 
 import com.plainprog.auth_session_redis.model.SessionData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,8 +55,8 @@ public class SessionExplorerService {
                 } else if (field.equals("sessionAttr:SPRING_SECURITY_CONTEXT")) {
                     Object context = serializer.deserialize(value);
                     if (context instanceof SecurityContextImpl) {
-                        Principal principal = ((SecurityContextImpl) context).getAuthentication();;
-                        sessionData.setPrincipal(principal);
+                        Principal principal = ((SecurityContextImpl) context).getAuthentication();
+                        sessionData.setPrincipal((UsernamePasswordAuthenticationToken)principal);
                     }
                 } else if (field.equals("maxInactiveInterval")) {
                     Object maxInactiveInterval = serializer.deserialize(value);
