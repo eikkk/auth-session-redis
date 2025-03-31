@@ -1,8 +1,8 @@
 package com.plainprog.auth_session_redis.service;
 
+import com.plainprog.auth_session_redis.model.BasicUserInfoDTO;
 import com.plainprog.auth_session_redis.model.SessionData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,11 +27,11 @@ public class SessionExplorerService {
         Map<byte[], byte[]> sessionDataByte = jedis.hgetAll(redisKey.getBytes());
         jedis.close();
 
+        BasicUserInfoDTO basicUserInfoDTO = new BasicUserInfoDTO();
         SessionData sessionData = new SessionData();
         for (Map.Entry<byte[], byte[]> entry : sessionDataByte.entrySet()) {
             String field = new String(entry.getKey());
             byte[] value = entry.getValue();
-
             try {
                 if (field.equals("sessionAttr:data")) {
                     Object data = serializer.deserialize(value);
@@ -56,7 +56,7 @@ public class SessionExplorerService {
                     Object context = serializer.deserialize(value);
                     if (context instanceof SecurityContextImpl) {
                         Principal principal = ((SecurityContextImpl) context).getAuthentication();
-                        sessionData.setPrincipal((UsernamePasswordAuthenticationToken)principal);
+                        basicUserInfoDTO.setUsername(principal.getName());
                     }
                 } else if (field.equals("maxInactiveInterval")) {
                     Object maxInactiveInterval = serializer.deserialize(value);
@@ -73,8 +73,9 @@ public class SessionExplorerService {
         List<String> roles = auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
-        sessionData.setRoles(roles);
+        basicUserInfoDTO.setAuthorities(roles);
         sessionData.setSessionId(sessionId);
+        sessionData.setUser(basicUserInfoDTO);
         return sessionData;
     }
 
