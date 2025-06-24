@@ -8,6 +8,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.stereotype.Service;
 
@@ -21,12 +23,18 @@ public class SessionExplorerService {
     @Autowired
     RedisSerializer serializer;
 
+    @Autowired
+    JedisPool jedisPool;
+
+    private Map<byte[], byte[]> getRedisKey(String redisKey) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.hgetAll(redisKey.getBytes());
+        }
+    }
+
     public SessionData getSessionData(String sessionId) {
         String redisKey = "spring:session:sessions:" + sessionId;
-        Jedis jedis = new Jedis("localhost", 5050);  // Ensure the host and port match your Redis setup
-        Map<byte[], byte[]> sessionDataByte = jedis.hgetAll(redisKey.getBytes());
-        jedis.close();
-
+        Map<byte[], byte[]> sessionDataByte = getRedisKey(redisKey);
         BasicUserInfoDTO basicUserInfoDTO = new BasicUserInfoDTO();
         SessionData sessionData = new SessionData();
         for (Map.Entry<byte[], byte[]> entry : sessionDataByte.entrySet()) {
@@ -36,16 +44,14 @@ public class SessionExplorerService {
                 if (field.equals("sessionAttr:data")) {
                     Object data = serializer.deserialize(value);
                     sessionData.setData(data);
-                }
-                else if (field.equals("creationTime")) {
+                } else if (field.equals("creationTime")) {
                     Object creationTime = serializer.deserialize(value);
                     if (creationTime instanceof Long) {
                         long creationTimeLong = (long) creationTime;
                         Instant instant = Instant.ofEpochMilli(creationTimeLong);
                         sessionData.setCreationTime(instant);
                     }
-                }
-                else if (field.equals("lastAccessedTime")) {
+                } else if (field.equals("lastAccessedTime")) {
                     Object lastAccessedTime = serializer.deserialize(value);
                     if (lastAccessedTime instanceof Long) {
                         long lastAccessedTimeLong = (long) lastAccessedTime;

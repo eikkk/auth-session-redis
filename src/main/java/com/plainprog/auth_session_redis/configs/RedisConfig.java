@@ -2,6 +2,9 @@ package com.plainprog.auth_session_redis.configs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+
 import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +29,13 @@ public class RedisConfig implements BeanClassLoaderAware {
         ObjectMapper mapper = new ObjectMapper(new MessagePackFactory());
         mapper.registerModules(SecurityJackson2Modules.getModules(this.loader));
         return new GenericJackson2JsonRedisSerializer(mapper);
+    }
+
+    @Bean
+    public JedisPool jedisPool() {
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        poolConfig.setMaxTotal(50);
+        return new JedisPool(poolConfig, redisHost, redisPort);
     }
 
     @Override
